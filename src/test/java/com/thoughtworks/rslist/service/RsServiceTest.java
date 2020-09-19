@@ -125,4 +125,10 @@ class RsServiceTest {
     verify(tradeRepository).save(TradeDto.builder().amount(10).rank(1).rsEventDto(rsEventDto).build());
     verify(rsEventRepository).deleteByRank(1);
   }
+
+  @Test
+  void shouldThrowExceptionWhenRsEventNotExist() {
+    when(rsEventRepository.findById(anyInt())).thenReturn(Optional.empty());
+    assertThrows(RuntimeException.class, () -> rsService.buy(trade, 1));
+  }
 }
