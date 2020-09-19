@@ -20,6 +20,6 @@ public class TradeDto {
     private int id;
     private int rank;
     private int amount;
-    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "tradeDto")
-    private List<RsEventDto> rsEventDtos;
+    @ManyToOne
+    private RsEventDto rsEventDto;
 }

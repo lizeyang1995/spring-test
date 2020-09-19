@@ -13,9 +13,9 @@ import com.thoughtworks.rslist.repository.VoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import javax.swing.text.html.parser.Entity;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RsService {
@@ -68,5 +68,30 @@ public class RsService {
       return false;
     }
     return true;
+  }
+
+  public void adjustRank() {
+    int rank = 1;
+    List<Integer> purchaseRank = new ArrayList<>();
+    List<TradeDto> allTradeDtos = tradeRepository.findAll();
+    Map<Integer, Integer> map = new HashMap<>();
+    for (int i = allTradeDtos.size() - 1; i >= 0; i--) {
+      map.put(allTradeDtos.get(i).getRsEventDto().getId(), allTradeDtos.get(i).getRank());
+    }
+    List<RsEventDto> allRsEvents = rsEventRepository.findAll().stream().sorted((s1, s2) -> s2.getVoteNum() - s1.getVoteNum()).collect(Collectors.toList());
+    for (int i = 0; i < allRsEvents.size(); i++) {
+      RsEventDto rsEventDto = allRsEvents.get(i);
+      if (map.containsKey(rsEventDto.getId())) {
+        rsEventDto.setRank(map.get(rsEventDto.getId()));
+        purchaseRank.add(rsEventDto.getRank());
+        continue;
+      }
+      if (!purchaseRank.contains(rank)) {
+        rsEventDto.setRank(rank);
+        continue;
+      }
+      rank++;
+    }
+    rsEventRepository.saveAll(allRsEvents);
   }
 }
