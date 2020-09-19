@@ -57,11 +57,11 @@ public class RsService {
     rsEventRepository.save(rsEvent);
   }
 
-  public boolean buy(Trade trade, int id) {
+  public boolean buy(Trade trade, int rsEventId) {
+    System.out.println("*************");
     priceOfRanking = Arrays.copyOf(priceOfRanking, rsEventRepository.findAll().size());
     int wantedRank = trade.getRank();
     int purchaseAmount = trade.getAmount();
-    int rsEventId = trade.getRsEventId();
     Optional<RsEventDto> foundRsEvent = rsEventRepository.findById(rsEventId);
     if (!foundRsEvent.isPresent()) {
       throw new RuntimeException();
@@ -72,7 +72,7 @@ public class RsService {
     RsEventDto rsEventDto = foundRsEvent.get();
     tradeRepository.save(TradeDto.builder().rank(trade.getRank()).rsEventDto(rsEventDto).amount(trade.getAmount()).build());
     priceOfRanking[trade.getRank() - 1] = trade.getAmount();
-    rsEventRepository.deleteRsEventDtoByRank(wantedRank);
+    rsEventRepository.deleteByRank(wantedRank);
     adjustRank();
     return true;
   }
@@ -93,10 +93,10 @@ public class RsService {
         purchaseRank.add(rsEventDto.getRank());
         continue;
       }
-      if (!purchaseRank.contains(rank)) {
-        rsEventDto.setRank(rank);
-        continue;
+      while (purchaseRank.contains(rank)) {
+        rank++;
       }
+      rsEventDto.setRank(rank);
       rank++;
     }
     rsEventRepository.saveAll(allRsEvents);

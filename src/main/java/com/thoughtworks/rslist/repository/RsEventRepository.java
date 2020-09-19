@@ -11,6 +11,8 @@ public interface RsEventRepository extends CrudRepository<RsEventDto, Integer> {
 
   @Transactional
   void deleteAllByUserId(int userId);
+  @Transactional
+  void deleteByRank(int rank);
 
-  void deleteRsEventDtoByRank(int rank);
+  RsEventDto findByRank(int rank);
 }

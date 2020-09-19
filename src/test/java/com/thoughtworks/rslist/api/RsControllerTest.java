@@ -1,5 +1,8 @@
 package com.thoughtworks.rslist.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thoughtworks.rslist.domain.Trade;
+import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.dto.RsEventDto;
 import com.thoughtworks.rslist.dto.UserDto;
 import com.thoughtworks.rslist.dto.VoteDto;
@@ -189,5 +192,29 @@ class RsControllerTest {
     List<VoteDto> voteDtos =  voteRepository.findAll();
     assertEquals(voteDtos.size(), 1);
     assertEquals(voteDtos.get(0).getNum(), 1);
+  }
+
+  @Test
+  void shouldPurchaseSuccess() throws Exception {
+    UserDto save = userRepository.save(userDto);
+
+    RsEventDto rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).rank(rsEventRepository.findAll().size() + 1).build();
+    rsEventRepository.save(rsEventDto);
+    int rsEventDtoId = rsEventDto.getId();
+    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).rank(rsEventRepository.findAll().size() + 1).voteNum(3).build();
+    rsEventRepository.save(rsEventDto);
+    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第三条事件").user(save).rank(rsEventRepository.findAll().size() + 1).voteNum(4).build();
+    rsEventRepository.save(rsEventDto);
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    Trade trade = Trade.builder().amount(10).rank(1).build();
+    String jsonString = objectMapper.writeValueAsString(trade);
+    mockMvc.perform(post("/rs/buy/{id}", rsEventDtoId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+    int size = rsEventRepository.findAll().size();
+    RsEventDto foundRsEvent = rsEventRepository.findByRank(1);
+    assertEquals(2, size);
+    assertEquals("第一条事件", foundRsEvent.getEventName());
   }
 }
