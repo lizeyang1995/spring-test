@@ -90,8 +90,7 @@ public class RsService {
       purchasedRsEventId.add(rsEventDto.getId());
     }
     List<RsEventDto> allRsEvents = rsEventRepository.findAll().stream().sorted((s1, s2) -> s2.getVoteNum() - s1.getVoteNum()).collect(Collectors.toList());
-    for (int i = 0; i < allRsEvents.size(); i++) {
-      RsEventDto rsEventDto = allRsEvents.get(i);
+    for (RsEventDto rsEventDto : allRsEvents) {
       if (purchasedRsEventId.contains(rsEventDto.getId())) {
         continue;
       }
