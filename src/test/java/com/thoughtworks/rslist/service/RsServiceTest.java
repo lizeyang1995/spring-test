@@ -1,7 +1,9 @@
 package com.thoughtworks.rslist.service;
 
+import com.thoughtworks.rslist.domain.Trade;
 import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.dto.RsEventDto;
+import com.thoughtworks.rslist.dto.TradeDto;
 import com.thoughtworks.rslist.dto.UserDto;
 import com.thoughtworks.rslist.dto.VoteDto;
 import com.thoughtworks.rslist.repository.RsEventRepository;
@@ -13,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,6 +35,7 @@ class RsServiceTest {
   TradeRepository tradeRepository;
   LocalDateTime localDateTime;
   Vote vote;
+  Trade trade;
 
   @BeforeEach
   void setUp() {
@@ -38,6 +43,7 @@ class RsServiceTest {
     rsService = new RsService(rsEventRepository, userRepository, voteRepository, tradeRepository);
     localDateTime = LocalDateTime.now();
     vote = Vote.builder().voteNum(2).rsEventId(1).time(localDateTime).userId(1).build();
+    trade = Trade.builder().amount(10).rank(1).rsEventId(1).build();
   }
 
   @Test
@@ -91,5 +97,32 @@ class RsServiceTest {
         () -> {
           rsService.vote(vote, 1);
         });
+  }
+
+  @Test
+  void shouldBuySuccess() {
+    UserDto userDto =
+            UserDto.builder()
+                    .voteNum(5)
+                    .phone("18888888888")
+                    .gender("female")
+                    .email("a@b.com")
+                    .age(19)
+                    .userName("xiaoli")
+                    .id(2)
+                    .build();
+    RsEventDto rsEventDto =
+            RsEventDto.builder()
+                    .eventName("event name")
+                    .id(1)
+                    .keyword("keyword")
+                    .voteNum(2)
+                    .user(userDto)
+                    .build();
+    when(rsEventRepository.findAll()).thenReturn(Collections.singletonList(rsEventDto));
+    when(rsEventRepository.findById(anyInt())).thenReturn(Optional.of(rsEventDto));
+    rsService.buy(trade, 1);
+    verify(tradeRepository).save(TradeDto.builder().amount(10).rank(1).rsEventDto(rsEventDto).build());
+    verify(rsEventRepository).deleteByRank(1);
   }
 }
