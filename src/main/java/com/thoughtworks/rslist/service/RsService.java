@@ -79,21 +79,24 @@ public class RsService {
 
   public void adjustRank() {
     int rank = 1;
-    List<Integer> purchaseRank = new ArrayList<>();
+    List<Integer> purchasedRank = new ArrayList<>();
     List<TradeDto> allTradeDtos = tradeRepository.findAll();
-    Map<Integer, Integer> map = new HashMap<>();
+    List<Integer> purchasedRsEventId = new ArrayList<>();
     for (int i = allTradeDtos.size() - 1; i >= 0; i--) {
-      map.put(allTradeDtos.get(i).getRsEventDto().getId(), allTradeDtos.get(i).getRank());
+      RsEventDto rsEventDto = allTradeDtos.get(i).getRsEventDto();
+      int newRank = allTradeDtos.get(i).getRank();
+      rsEventDto.setRank(newRank);
+      rsEventRepository.save(rsEventDto);
+      purchasedRank.add(newRank);
+      purchasedRsEventId.add(rsEventDto.getId());
     }
     List<RsEventDto> allRsEvents = rsEventRepository.findAll().stream().sorted((s1, s2) -> s2.getVoteNum() - s1.getVoteNum()).collect(Collectors.toList());
     for (int i = 0; i < allRsEvents.size(); i++) {
       RsEventDto rsEventDto = allRsEvents.get(i);
-      if (map.containsKey(rsEventDto.getId())) {
-        rsEventDto.setRank(map.get(rsEventDto.getId()));
-        purchaseRank.add(rsEventDto.getRank());
+      if (purchasedRsEventId.contains(rsEventDto.getId())) {
         continue;
       }
-      while (purchaseRank.contains(rank)) {
+      while (purchasedRank.contains(rank)) {
         rank++;
       }
       rsEventDto.setRank(rank);
