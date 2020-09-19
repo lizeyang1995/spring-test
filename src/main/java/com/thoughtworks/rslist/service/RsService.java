@@ -23,13 +23,14 @@ public class RsService {
   final UserRepository userRepository;
   final VoteRepository voteRepository;
   final TradeRepository tradeRepository;
-  final List<Integer> priceOfRanking = new ArrayList<>();
+  int[] priceOfRanking;
 
   public RsService(RsEventRepository rsEventRepository, UserRepository userRepository, VoteRepository voteRepository, TradeRepository tradeRepository) {
     this.rsEventRepository = rsEventRepository;
     this.userRepository = userRepository;
     this.voteRepository = voteRepository;
     this.tradeRepository = tradeRepository;
+    this.priceOfRanking = new int[rsEventRepository.findAll().size()];
   }
 
   public void vote(Vote vote, int rsEventId) {
@@ -57,6 +58,7 @@ public class RsService {
   }
 
   public boolean buy(Trade trade, int id) {
+    priceOfRanking = Arrays.copyOf(priceOfRanking, rsEventRepository.findAll().size());
     int wantedRank = trade.getRank();
     int purchaseAmount = trade.getAmount();
     int rsEventId = trade.getRsEventId();
@@ -64,9 +66,14 @@ public class RsService {
     if (!foundRsEvent.isPresent()) {
       throw new RuntimeException();
     }
-    if (priceOfRanking.size() >= wantedRank && priceOfRanking.get(wantedRank - 1) >= purchaseAmount) {
+    if (priceOfRanking.length >= wantedRank && priceOfRanking[wantedRank - 1] >= purchaseAmount) {
       return false;
     }
+    RsEventDto rsEventDto = foundRsEvent.get();
+    tradeRepository.save(TradeDto.builder().rank(trade.getRank()).rsEventDto(rsEventDto).amount(trade.getAmount()).build());
+    priceOfRanking[trade.getRank() - 1] = trade.getAmount();
+    rsEventRepository.deleteRsEventDtoByRank(wantedRank);
+    adjustRank();
     return true;
   }
 
