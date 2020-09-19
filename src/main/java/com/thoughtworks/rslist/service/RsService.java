@@ -65,10 +65,10 @@ public class RsService {
     if (!foundRsEvent.isPresent()) {
       throw new RuntimeException();
     }
-    if (priceOfRanking.length >= wantedRank && priceOfRanking[wantedRank - 1] >= purchaseAmount) {
+    RsEventDto rsEventDto = foundRsEvent.get();
+    if (priceOfRanking.length < wantedRank || priceOfRanking[wantedRank - 1] >= purchaseAmount || wantedRank == rsEventDto.getRank()) {
       return false;
     }
-    RsEventDto rsEventDto = foundRsEvent.get();
     tradeRepository.save(TradeDto.builder().rank(trade.getRank()).rsEventDto(rsEventDto).amount(trade.getAmount()).build());
     priceOfRanking[trade.getRank() - 1] = trade.getAmount();
     rsEventRepository.deleteByRank(wantedRank);
