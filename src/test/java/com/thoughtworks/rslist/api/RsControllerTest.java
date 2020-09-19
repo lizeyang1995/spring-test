@@ -217,4 +217,33 @@ class RsControllerTest {
     assertEquals(2, size);
     assertEquals("第三条事件", foundRsEvent.getEventName());
   }
+
+  @Test
+  void shouldPurchaseFail() throws Exception {
+    UserDto save = userRepository.save(userDto);
+
+    RsEventDto rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).rank(rsEventRepository.findAll().size() + 1).voteNum(3).build();
+    rsEventRepository.save(rsEventDto);
+    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).rank(rsEventRepository.findAll().size() + 1).voteNum(2).build();
+    rsEventRepository.save(rsEventDto);
+    int rsEventDtoId = rsEventDto.getId();
+    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第三条事件").user(save).rank(rsEventRepository.findAll().size() + 1).voteNum(1).build();
+    rsEventRepository.save(rsEventDto);
+    int anotherRsEventDtoId = rsEventDto.getId();
+
+    ObjectMapper objectMapper = new ObjectMapper();
+    Trade trade = Trade.builder().amount(10).rank(1).build();
+    String jsonString = objectMapper.writeValueAsString(trade);
+    mockMvc.perform(post("/rs/buy/{id}", rsEventDtoId).content(jsonString).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    Trade anotherTrade = Trade.builder().amount(9).rank(1).build();
+    String anotherJsonString = objectMapper.writeValueAsString(anotherTrade);
+    mockMvc.perform(post("/rs/buy/{id}", anotherRsEventDtoId).content(anotherJsonString).contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
+
+    int size = rsEventRepository.findAll().size();
+    RsEventDto foundRsEvent = rsEventRepository.findByRank(1);
+    assertEquals(2, size);
+    assertEquals("第二条事件", foundRsEvent.getEventName());
+  }
 }

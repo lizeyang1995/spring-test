@@ -103,7 +103,6 @@ public class RsController {
 
   @PostMapping("/rs/buy/{id}")
   public ResponseEntity buy(@PathVariable int id, @RequestBody Trade trade){
-    System.out.println("111111111111111111111");
     boolean buySuccessful = rsService.buy(trade, id);
     if (buySuccessful) {
       return ResponseEntity.ok().build();

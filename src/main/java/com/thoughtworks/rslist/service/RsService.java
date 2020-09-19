@@ -58,7 +58,6 @@ public class RsService {
   }
 
   public boolean buy(Trade trade, int rsEventId) {
-    System.out.println("*************");
     priceOfRanking = Arrays.copyOf(priceOfRanking, rsEventRepository.findAll().size());
     int wantedRank = trade.getRank();
     int purchaseAmount = trade.getAmount();
