@@ -58,7 +58,7 @@ class RsControllerTest {
     UserDto save = userRepository.save(userDto);
 
     RsEventDto rsEventDto =
-        RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+        RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).rank(rsEventRepository.findAll().size() + 1).build();
 
     rsEventRepository.save(rsEventDto);
 
@@ -67,6 +67,7 @@ class RsControllerTest {
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].eventName", is("第一条事件")))
         .andExpect(jsonPath("$[0].keyword", is("无分类")))
+        .andExpect(jsonPath("$[0].rank", is(1)))
         .andExpect(jsonPath("$[0]", not(hasKey("user"))))
         .andExpect(status().isOk());
   }
@@ -76,15 +77,15 @@ class RsControllerTest {
     UserDto save = userRepository.save(userDto);
 
     RsEventDto rsEventDto =
-        RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+        RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).rank(rsEventRepository.findAll().size() + 1).build();
 
     rsEventRepository.save(rsEventDto);
-    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).build();
+    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).rank(rsEventRepository.findAll().size() + 1).build();
     rsEventRepository.save(rsEventDto);
     mockMvc.perform(get("/rs/1")).andExpect(jsonPath("$.eventName", is("第一条事件")));
-    mockMvc.perform(get("/rs/1")).andExpect(jsonPath("$.keyword", is("无分类")));
+    mockMvc.perform(get("/rs/1")).andExpect(jsonPath("$.keyword", is("无分类"))).andExpect(jsonPath("$.rank", is(1)));
     mockMvc.perform(get("/rs/2")).andExpect(jsonPath("$.eventName", is("第二条事件")));
-    mockMvc.perform(get("/rs/2")).andExpect(jsonPath("$.keyword", is("无分类")));
+    mockMvc.perform(get("/rs/2")).andExpect(jsonPath("$.keyword", is("无分类"))).andExpect(jsonPath("$.rank", is(2)));
   }
 
   @Test
@@ -100,27 +101,31 @@ class RsControllerTest {
     UserDto save = userRepository.save(userDto);
 
     RsEventDto rsEventDto =
-        RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+        RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).rank(rsEventRepository.findAll().size() + 1).build();
 
     rsEventRepository.save(rsEventDto);
-    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).build();
+    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).rank(rsEventRepository.findAll().size() + 1).build();
     rsEventRepository.save(rsEventDto);
-    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第三条事件").user(save).build();
+    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第三条事件").user(save).rank(rsEventRepository.findAll().size() + 1).build();
     rsEventRepository.save(rsEventDto);
     mockMvc
         .perform(get("/rs/list?start=1&end=2"))
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].eventName", is("第一条事件")))
         .andExpect(jsonPath("$[0].keyword", is("无分类")))
+        .andExpect(jsonPath("$[0].rank", is(1)))
         .andExpect(jsonPath("$[1].eventName", is("第二条事件")))
-        .andExpect(jsonPath("$[1].keyword", is("无分类")));
+        .andExpect(jsonPath("$[1].keyword", is("无分类")))
+        .andExpect(jsonPath("$[1].rank", is(2)));
     mockMvc
         .perform(get("/rs/list?start=2&end=3"))
         .andExpect(jsonPath("$", hasSize(2)))
         .andExpect(jsonPath("$[0].eventName", is("第二条事件")))
         .andExpect(jsonPath("$[0].keyword", is("无分类")))
+        .andExpect(jsonPath("$[0].rank", is(2)))
         .andExpect(jsonPath("$[1].eventName", is("第三条事件")))
-        .andExpect(jsonPath("$[1].keyword", is("无分类")));
+        .andExpect(jsonPath("$[1].keyword", is("无分类")))
+        .andExpect(jsonPath("$[1].rank", is(3)));
     mockMvc
         .perform(get("/rs/list?start=1&end=3"))
         .andExpect(jsonPath("$", hasSize(3)))
@@ -163,7 +168,7 @@ class RsControllerTest {
   public void shouldVoteSuccess() throws Exception {
     UserDto save = userRepository.save(userDto);
     RsEventDto rsEventDto =
-        RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+        RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).rank(rsEventRepository.findAll().size() + 1).build();
     rsEventDto = rsEventRepository.save(rsEventDto);
 
     String jsonValue =

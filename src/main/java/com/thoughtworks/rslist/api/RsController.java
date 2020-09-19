@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,6 +39,7 @@ public class RsController {
       @RequestParam(required = false) Integer start, @RequestParam(required = false) Integer end) {
     List<RsEvent> rsEvents =
         rsEventRepository.findAll().stream()
+            .sorted(Comparator.comparingInt(RsEventDto::getRank))
             .map(
                 item ->
                     RsEvent.builder()
@@ -45,6 +47,7 @@ public class RsController {
                         .keyword(item.getKeyword())
                         .userId(item.getId())
                         .voteNum(item.getVoteNum())
+                        .rank(item.getRank())
                         .build())
             .collect(Collectors.toList());
     if (start == null || end == null) {
@@ -57,6 +60,7 @@ public class RsController {
   public ResponseEntity<RsEvent> getRsEvent(@PathVariable int index) {
     List<RsEvent> rsEvents =
         rsEventRepository.findAll().stream()
+            .sorted(Comparator.comparingInt(RsEventDto::getRank))
             .map(
                 item ->
                     RsEvent.builder()
@@ -64,6 +68,7 @@ public class RsController {
                         .keyword(item.getKeyword())
                         .userId(item.getId())
                         .voteNum(item.getVoteNum())
+                        .rank(item.getRank())
                         .build())
             .collect(Collectors.toList());
     if (index < 1 || index > rsEvents.size()) {
@@ -84,6 +89,7 @@ public class RsController {
             .eventName(rsEvent.getEventName())
             .voteNum(0)
             .user(userDto.get())
+            .rank(rsEventRepository.findAll().size() + 1)
             .build();
     rsEventRepository.save(build);
     return ResponseEntity.created(null).build();

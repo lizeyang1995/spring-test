@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Builder
@@ -20,5 +21,5 @@ public class TradeDto {
     private int rank;
     private int amount;
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "tradeDto")
-    private RsEventDto rsEventDto;
+    private List<RsEventDto> rsEventDtos;
 }
