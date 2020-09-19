@@ -23,4 +23,5 @@ public class RsEventDto {
   private String keyword;
   private int voteNum;
   @ManyToOne private UserDto user;
+  @ManyToOne private TradeDto tradeDto;
 }
