@@ -10,10 +10,8 @@ import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.TradeRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -81,14 +79,11 @@ public class RsService {
     List<Integer> purchasedRank = new ArrayList<>();
     List<TradeDto> allTradeDtos = tradeRepository.findAll();
     List<Integer> purchasedRsEventId = new ArrayList<>();
-    for (int i = allTradeDtos.size() - 1; i >= 0; i--) {
-      RsEventDto rsEventDto = allTradeDtos.get(i).getRsEventDto();
-      int newRank = allTradeDtos.get(i).getRank();
-      rsEventDto.setRank(newRank);
-      rsEventRepository.save(rsEventDto);
-      purchasedRank.add(newRank);
-      purchasedRsEventId.add(rsEventDto.getId());
-    }
+    setNewRankForPurchasedEvent(purchasedRank, allTradeDtos, purchasedRsEventId);
+    setNewRankForNormalEvent(purchasedRsEventId, purchasedRank, rank);
+  }
+
+  private void setNewRankForNormalEvent(List<Integer> purchasedRsEventId, List<Integer> purchasedRank, int rank) {
     List<RsEventDto> allRsEvents = rsEventRepository.findAll().stream().sorted((s1, s2) -> s2.getVoteNum() - s1.getVoteNum()).collect(Collectors.toList());
     for (RsEventDto rsEventDto : allRsEvents) {
       if (purchasedRsEventId.contains(rsEventDto.getId())) {
@@ -101,5 +96,16 @@ public class RsService {
       rank++;
     }
     rsEventRepository.saveAll(allRsEvents);
+  }
+
+  private void setNewRankForPurchasedEvent(List<Integer> purchasedRank, List<TradeDto> allTradeDtos, List<Integer> purchasedRsEventId) {
+    for (int i = allTradeDtos.size() - 1; i >= 0; i--) {
+      RsEventDto rsEventDto = allTradeDtos.get(i).getRsEventDto();
+      int newRank = allTradeDtos.get(i).getRank();
+      rsEventDto.setRank(newRank);
+      rsEventRepository.save(rsEventDto);
+      purchasedRank.add(newRank);
+      purchasedRsEventId.add(rsEventDto.getId());
+    }
   }
 }
