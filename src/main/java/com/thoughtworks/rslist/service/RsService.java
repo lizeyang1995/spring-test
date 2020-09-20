@@ -61,7 +61,7 @@ public class RsService {
     int purchaseAmount = trade.getAmount();
     Optional<RsEventDto> foundRsEvent = rsEventRepository.findById(rsEventId);
     if (!foundRsEvent.isPresent()) {
-      throw new RuntimeException();
+      throw new IllegalArgumentException("invalid rsEventId");
     }
     RsEventDto rsEventDto = foundRsEvent.get();
     if (priceOfRanking.length < wantedRank || priceOfRanking[wantedRank - 1] >= purchaseAmount || wantedRank == rsEventDto.getRank()) {

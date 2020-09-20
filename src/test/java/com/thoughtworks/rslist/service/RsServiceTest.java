@@ -129,6 +129,6 @@ class RsServiceTest {
   @Test
   void shouldThrowExceptionWhenRsEventNotExist() {
     when(rsEventRepository.findById(anyInt())).thenReturn(Optional.empty());
-    assertThrows(RuntimeException.class, () -> rsService.buy(trade, 1));
+    assertThrows(IllegalArgumentException.class, () -> rsService.buy(trade, 1));
   }
 }

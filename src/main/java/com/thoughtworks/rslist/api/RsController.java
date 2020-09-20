@@ -110,7 +110,7 @@ public class RsController {
 
 
   @ExceptionHandler(RequestNotValidException.class)
-  public ResponseEntity<Error> handleRequestErrorHandler(RequestNotValidException e) {
+  public ResponseEntity<Error> handleRequestErrorHandler(Exception e) {
     Error error = new Error();
     error.setError(e.getMessage());
     return ResponseEntity.badRequest().body(error);
