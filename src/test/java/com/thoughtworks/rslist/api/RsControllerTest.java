@@ -196,6 +196,31 @@ class RsControllerTest {
   }
 
   @Test
+  public void shouldReorderWhenVoteSuccess() throws Exception {
+    UserDto save = userRepository.save(userDto);
+
+    RsEventDto rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).rank(rsEventRepository.findAll().size() + 1).voteNum(3).build();
+    rsEventRepository.save(rsEventDto);
+    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).rank(rsEventRepository.findAll().size() + 1).voteNum(2).build();
+    rsEventRepository.save(rsEventDto);
+    rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第三条事件").user(save).rank(rsEventRepository.findAll().size() + 1).voteNum(1).build();
+    rsEventRepository.save(rsEventDto);
+
+    String jsonValue =
+            String.format(
+                    "{\"userId\":%d,\"time\":\"%s\",\"voteNum\":4}",
+                    save.getId(), LocalDateTime.now().toString());
+    mockMvc
+            .perform(
+                    post("/rs/vote/{id}", rsEventDto.getId())
+                            .content(jsonValue)
+                            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+    RsEventDto foundRsEventDto = rsEventRepository.findByRank(1);
+    assertEquals("第三条事件", foundRsEventDto.getEventName());
+  }
+
+  @Test
   @DirtiesContext
   void shouldPurchaseSuccess() throws Exception {
     UserDto save = userRepository.save(userDto);

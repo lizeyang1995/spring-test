@@ -53,6 +53,7 @@ public class RsService {
     RsEventDto rsEvent = rsEventDto.get();
     rsEvent.setVoteNum(rsEvent.getVoteNum() + vote.getVoteNum());
     rsEventRepository.save(rsEvent);
+    adjustRank();
   }
 
   public boolean buy(Trade trade, int rsEventId) {
